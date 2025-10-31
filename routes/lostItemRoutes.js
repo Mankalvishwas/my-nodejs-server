@@ -1,51 +1,69 @@
 const express = require('express');
 const router = express.Router();
-const {LostItem}=require('../models/lostItem');
-const { v4: uuidv4 } = require('uuid');
+const { LostItem } = require('../models/LostItem');
 
-
-
+// GET all lost items
 router.get('/lostfound', async (req, res) => {
-  const items = await LostItem.find();
-  res.json(items);
+  try {
+    const items = await LostItem.find();
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching items', error });
+  }
 });
 
+// POST - Create new lost item
 router.post('/lostfound', async (req, res) => {
-  const newItem = new LostItem(req.body);
-  await newItem.save();
-  res.status(201).json({ message: 'Item reported!', item: newItem });
+  try {
+    const newItem = new LostItem(req.body);
+    await newItem.save();
+    res.status(201).json({ message: 'Item reported!', item: newItem });
+  } catch (error) {
+    res.status(400).json({ message: 'Error creating item', error });
+  }
 });
 
-
-router.post('/lostfound', (req,res) => {
-    const newItem = { ...req.body, id: uuidv4() };
-    items.push(newItem);
-    res.status(201).json({message:'item reported!',newItem});
-});
-
-router.delete('/lostfound/:index', (req,res) => {
-    const index = parseInt(req.params.index);
-    if(isNaN(index) || index < 0 || index >= items.length) {
-        return res.status(400).json({message:'invalid not found'});
+// GET single item by ID
+router.get('/lostfound/:id', async (req, res) => {
+  try {
+    const item = await LostItem.findById(req.params.id);
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
     }
-    const removed=items.splice(index,1);
-    res.json({message:'Item deleted',item:removed[0]});
+    res.json(item);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching item', error });
+  }
 });
 
-router.put('/lostfound/:index', (req,res)=> {
-    const index=parseInt(req.params.index);
-    if(isNaN(index) || index<0 || index>=items.length) {
-        return res.status(404).json({ message:'invalied index'});
+// PUT - Update item by ID
+router.put('/lostfound/:id', async (req, res) => {
+  try {
+    const updatedItem = await LostItem.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!updatedItem) {
+      return res.status(404).json({ message: 'Item not found' });
     }
-    items[index]=req.body;
-    res.json({message:'item is updated',item:items[index]});
+    res.json({ message: 'Item updated', item: updatedItem });
+  } catch (error) {
+    res.status(400).json({ message: 'Error updating item', error });
+  }
 });
-// single get for specified index
-router.get('/lostfound/:index',(req,res)=>{
-    const index=parseInt(req.params.id);
-    if (isNaN(index) || index<0 || index>=items.length) {
-        return res.status(404).json({message:'invalid index placed'});
+
+// DELETE item by ID
+router.delete('/lostfound/:id', async (req, res) => {
+  try {
+    const deletedItem = await LostItem.findByIdAndDelete(req.params.id);
+    if (!deletedItem) {
+      return res.status(404).json({ message: 'Item not found' });
     }
-    res.json(items[index]);
+    res.json({ message: 'Item deleted', item: deletedItem });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting item', error });
+  }
 });
-module.exports = router;    
+
+module.exports = router;
