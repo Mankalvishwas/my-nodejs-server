@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { LostItem } = require('../models/LostItem');
+const LostItem = require('../models/LostItem');  // ← FIXED: Removed curly braces
 
 // GET all lost items
 router.get('/lostfound', async (req, res) => {
@@ -8,7 +8,11 @@ router.get('/lostfound', async (req, res) => {
     const items = await LostItem.find();
     res.json(items);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching items', error });
+    console.error('Error fetching items:', error);
+    res.status(500).json({ 
+      message: 'Error fetching items', 
+      error: error.message 
+    });
   }
 });
 
@@ -19,7 +23,11 @@ router.post('/lostfound', async (req, res) => {
     await newItem.save();
     res.status(201).json({ message: 'Item reported!', item: newItem });
   } catch (error) {
-    res.status(400).json({ message: 'Error creating item', error });
+    console.error('Error creating item:', error);
+    res.status(400).json({ 
+      message: 'Error creating item', 
+      error: error.message 
+    });
   }
 });
 
@@ -32,7 +40,11 @@ router.get('/lostfound/:id', async (req, res) => {
     }
     res.json(item);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching item', error });
+    console.error('Error fetching item:', error);
+    res.status(500).json({ 
+      message: 'Error fetching item', 
+      error: error.message 
+    });
   }
 });
 
@@ -49,7 +61,11 @@ router.put('/lostfound/:id', async (req, res) => {
     }
     res.json({ message: 'Item updated', item: updatedItem });
   } catch (error) {
-    res.status(400).json({ message: 'Error updating item', error });
+    console.error('Error updating item:', error);
+    res.status(400).json({ 
+      message: 'Error updating item', 
+      error: error.message 
+    });
   }
 });
 
@@ -62,7 +78,11 @@ router.delete('/lostfound/:id', async (req, res) => {
     }
     res.json({ message: 'Item deleted', item: deletedItem });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting item', error });
+    console.error('Error deleting item:', error);
+    res.status(500).json({ 
+      message: 'Error deleting item', 
+      error: error.message 
+    });
   }
 });
 
